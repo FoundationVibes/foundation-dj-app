@@ -17,3 +17,13 @@
 - Hosting: Vercel, Firebase, App Store / Play Store
 
 ## 📂 Repo Structure
+```
+foundation-dj-app/
+├── /client/           ← Frontend app (React/Next.js or mobile)
+├── /server/           ← Backend code (Firebase functions, API, DB)
+├── /docs/             ← Project documentation, dev brief, planning
+├── README.md          ← Main project overview
+├── .env.example       ← Sample environment config
+├── .gitignore         ← Ignored files/folders
+└── LICENSE            ← (Optional, only if open-sourcing later)
+```
