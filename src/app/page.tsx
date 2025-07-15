@@ -1,101 +1,89 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/config";
+import React, { useState } from 'react';
 
-const orgConfig = {
-  logo: "squares",
-  title: "Foundation Vibes",
-  tagline: "The only app that connects DJs and clients with a pro touch.",
-  buttonUrl: "https://www.az3ntoh.com",
+type Transaction = {
+  description: string;
+  amount: number;
 };
 
-export default function Home() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+export default function FinancialTracker() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState<number | ''>('');
 
-  function handleLogin(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please enter email and password.");
-      return;
-    }
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        router.push("/dashboard");
-      })
-      .catch((err) => {
-        setError("Login failed: Firebase: " + err.message);
-      });
-  }
+    if (description.trim() === '' || amount === '') return;
+
+    setTransactions([...transactions, { description, amount: Number(amount) }]);
+    setDescription('');
+    setAmount('');
+  };
+
+  const income = transactions
+    .filter((t) => t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const expenses = transactions
+    .filter((t) => t.amount < 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const balance = income + expenses;
 
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center bg-white relative p-4">
-      {/* Top Right Button */}
-      <div className="w-full flex justify-end px-8 pt-7 absolute top-0 left-0 z-30">
-        <a
-          href={orgConfig.buttonUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-black text-white font-bold px-6 py-2 rounded-full shadow hover:bg-cyan-700 border-2 border-black text-sm uppercase tracking-wider"
-        >
-          Request Info
-        </a>
+    <div style={{ maxWidth: '600px', margin: '2rem auto', padding: '1rem' }}>
+      <h1>💰 Financial Tracker</h1>
+
+      <div style={{ marginBottom: '1rem' }}>
+        <strong>Income:</strong> ${income.toFixed(2)} |{' '}
+        <strong>Expenses:</strong> ${Math.abs(expenses).toFixed(2)} |{' '}
+        <strong>Balance:</strong> ${balance.toFixed(2)}
       </div>
 
-      <h1 className="text-4xl font-extrabold text-black mb-4 drop-shadow-lg text-center">
-        ⬜⬜ {orgConfig.title} Login
-      </h1>
-      <p className="text-lg text-gray-700 max-w-md mx-auto mb-6 text-center">
-        {orgConfig.tagline}
-      </p>
-
-      {error && <p className="text-red-600 text-sm mb-4 text-center">{error}</p>}
-
-      <form onSubmit={handleLogin} className="w-full max-w-sm flex flex-col gap-4">
-        <label className="text-black text-sm font-semibold">Email</label>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="partytime@gmail.com"
-          className="border border-black p-3 rounded w-full text-black placeholder-gray-700"
+          type="text"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+          style={{ marginRight: '0.5rem', padding: '0.5rem' }}
         />
-
-        <label className="text-black text-sm font-semibold">Password</label>
         <input
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          className="border border-black p-3 rounded w-full text-black placeholder-gray-700"
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
+          required
+          style={{ marginRight: '0.5rem', padding: '0.5rem' }}
         />
-
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="showPassword"
-            checked={showPassword}
-            onChange={() => setShowPassword(!showPassword)}
-            className="mr-2"
-          />
-          <label htmlFor="showPassword" className="text-sm text-gray-700">Show Password</label>
-        </div>
-
-        <button type="submit" className="bg-black text-white py-3 rounded hover:bg-cyan-700">
-          Log In
+        <button type="submit" style={{ padding: '0.5rem 1rem' }}>
+          Add
         </button>
       </form>
 
-      <footer className="mt-10 text-xs text-gray-400 text-center">
-        © {new Date().getFullYear()} {orgConfig.title}. All rights reserved.
-      </footer>
-    </main>
+      <table width="100%" style={{ borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th style={{ borderBottom: '1px solid #ccc', padding: '0.5rem' }}>Description</th>
+            <th style={{ borderBottom: '1px solid #ccc', padding: '0.5rem' }}>Amount</th>
+            <th style={{ borderBottom: '1px solid #ccc', padding: '0.5rem' }}>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.map((tx, index) => (
+            <tr key={index}>
+              <td style={{ padding: '0.5rem' }}>{tx.description}</td>
+              <td style={{ padding: '0.5rem' }}>${tx.amount.toFixed(2)}</td>
+              <td style={{ padding: '0.5rem' }}>
+                {tx.amount >= 0 ? 'Income' : 'Expense'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
