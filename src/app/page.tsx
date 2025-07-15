@@ -7,7 +7,7 @@ import { auth } from "../firebase/config";
 
 const orgConfig = {
   logo: "squares",
-  title: "Foundation Vibes",
+  title: "Foundation Vibesm",
   tagline: "The only app that connects DJs and clients with a pro touch.",
   buttonUrl: "https://www.az3ntoh.com",
 };
