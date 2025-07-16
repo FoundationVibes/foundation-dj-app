@@ -14,6 +14,8 @@ const [error, setError] = useState('');
 const [focusBox, setFocusBox] = useState<"email" | "password" | null>(null); // <-- ADD THIS!
 const router = useRouter();
 
+
+
   const handleLogin = async () => {
     setError('');
     try {
