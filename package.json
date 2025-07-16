@@ -19,7 +19,6 @@
     "@eslint/eslintrc": "^3",
     "@firebase/app-types": "^0.9.3",
     "@tailwindcss/postcss": "^4",
-    "@types/firebase": "^3.2.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
