@@ -5,19 +5,27 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import ReCAPTCHA from 'react-google-recaptcha'; // <-- Correct import
 
 export default function LoginPage() {
-const [email, setEmail] = useState('');
-const [password, setPassword] = useState('');
-const [showPassword, setShowPassword] = useState(false);
-const [error, setError] = useState('');
-const [focusBox, setFocusBox] = useState<"email" | "password" | null>(null); // <-- ADD THIS!
-const router = useRouter();
-
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [focusBox, setFocusBox] = useState<"email" | "password" | null>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null); // <-- Add state
+  const router = useRouter();
+  const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
   const handleLogin = async () => {
     setError('');
+
+    // Require reCAPTCHA before login
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA!");
+      return;
+    }
+
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCred.user.uid;
@@ -80,41 +88,40 @@ const router = useRouter();
       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-cyan-950 to-black opacity-80 z-0"></div>
 
       {/* Top right Request Info button */}
-     <a
-  href="https://www.az3ntoh.com"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="absolute top-7 right-8 border-2 border-cyan-500 text-cyan-500 hover:bg-cyan-500 hover:text-black font-semibold px-4 py-1.5 rounded-lg shadow-sm transition z-20 tracking-wide bg-white/70 backdrop-blur"
-  style={{ fontSize: '1rem', fontWeight: 600 }}
->
-  Request Info
-</a>
+      <a
+        href="https://www.az3ntoh.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute top-7 right-8 border-2 border-cyan-500 text-cyan-500 hover:bg-cyan-500 hover:text-black font-semibold px-4 py-1.5 rounded-lg shadow-sm transition z-20 tracking-wide bg-white/70 backdrop-blur"
+        style={{ fontSize: '1rem', fontWeight: 600 }}
+      >
+        Request Info
+      </a>
 
       {/* Main Login Box */}
       <div className="relative z-10 flex flex-col items-center w-full max-w-md">
         {/* Branding */}
-      <div className="flex flex-col items-center mb-8 select-none">
-  {/* Vinyl record DJ icon */}
-  <div className="mb-2">
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="22" fill="#06b6d4" stroke="black" strokeWidth="4"/>
-      <circle cx="24" cy="24" r="7" fill="white" stroke="#0e7490" strokeWidth="3"/>
-      <circle cx="24" cy="24" r="2.5" fill="#0e7490"/>
-    </svg>
-  </div>
- <div
-  className="text-3xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide bg-gradient-to-r from-cyan-300 via-white to-cyan-400 bg-clip-text text-transparent drop-shadow-lg px-2 text-center"
-  style={{ letterSpacing: '0.09em', lineHeight: 1.12 }}
->
-  Foundation Vibes
-</div>
-  <div className="text-lg font-mono text-cyan-400 mt-2 font-bold uppercase tracking-widest drop-shadow">
-    Built by DJs for DJs
-  </div>
-  {/* Animated underline bar */}
-  <div className="mt-2 w-24 h-2 rounded-full bg-cyan-400 blur-sm animate-pulse mx-auto" />
-</div>
-
+        <div className="flex flex-col items-center mb-8 select-none">
+          {/* Vinyl record DJ icon */}
+          <div className="mb-2">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="22" fill="#06b6d4" stroke="black" strokeWidth="4" />
+              <circle cx="24" cy="24" r="7" fill="white" stroke="#0e7490" strokeWidth="3" />
+              <circle cx="24" cy="24" r="2.5" fill="#0e7490" />
+            </svg>
+          </div>
+          <div
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide bg-gradient-to-r from-cyan-300 via-white to-cyan-400 bg-clip-text text-transparent drop-shadow-lg px-2 text-center"
+            style={{ letterSpacing: '0.09em', lineHeight: 1.12 }}
+          >
+            Foundation Vibes
+          </div>
+          <div className="text-lg font-mono text-cyan-400 mt-2 font-bold uppercase tracking-widest drop-shadow">
+            Built by DJs for DJs
+          </div>
+          {/* Animated underline bar */}
+          <div className="mt-2 w-24 h-2 rounded-full bg-cyan-400 blur-sm animate-pulse mx-auto" />
+        </div>
 
         {/* Email Box */}
         <div className={
@@ -138,10 +145,10 @@ const router = useRouter();
         </div>
 
         {/* Password Box */}
-       <div className={
-         `w-full mb-1 rounded-2xl border-4 border-cyan-700 bg-white shadow-lg px-6 py-6 flex flex-col transition-all duration-200 ` +
-         (focusBox === "password" ? "scale-105 shadow-cyan-400/70 z-10 border-cyan-400" : "")
-      }>
+        <div className={
+          `w-full mb-1 rounded-2xl border-4 border-cyan-700 bg-white shadow-lg px-6 py-6 flex flex-col transition-all duration-200 ` +
+          (focusBox === "password" ? "scale-105 shadow-cyan-400/70 z-10 border-cyan-400" : "")
+        }>
           <label htmlFor="password" className="text-base font-bold text-black mb-2 uppercase tracking-wide">
             Password
           </label>
@@ -156,7 +163,6 @@ const router = useRouter();
               className="w-full p-3 rounded-lg border-2 border-black text-black font-extrabold bg-white placeholder-gray-400 text-lg focus:outline-none focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700 pr-12"
               onFocus={() => setFocusBox("password")}
               onBlur={() => setFocusBox(null)}
-
             />
             {/* Show/hide password button */}
             <button
@@ -198,6 +204,15 @@ const router = useRouter();
           </div>
         </div>
 
+        {/* reCAPTCHA widget just above the SIGN IN button */}
+        <div className="mb-4 flex justify-center">
+          <ReCAPTCHA
+            sitekey={RECAPTCHA_SITE_KEY}
+            onChange={(token: string | null) => setRecaptchaToken(token)}
+
+          />
+        </div>
+
         {/* Login Button */}
         <button
           onClick={handleLogin}
@@ -224,10 +239,8 @@ const router = useRouter();
 
         {/* Footer */}
         <div className="mt-10 mb-2 text-cyan-300 text-base md:text-lg italic text-center select-none font-extrabold drop-shadow-[0_4px_24px_cyan]">
-  “Join the new standard for DJ event management. <span className="not-italic"></span>”
-
-
-</div>
+          “Join the new standard for DJ event management. <span className="not-italic"></span>”
+        </div>
 
         <div className="mt-10 text-gray-400 text-xs text-center select-none font-semibold tracking-wide">
           &copy; {new Date().getFullYear()} Foundation Systems. All rights reserved.
