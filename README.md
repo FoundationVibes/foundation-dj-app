@@ -63,6 +63,20 @@ Use `.env.example` as a guide!
 
 ---
 
+---
+
+## 🗺️ Git Workflow (How We Work)
+
+1. Make a new branch for your feature or bug fix. (Example: `feature/add-login`)
+2. Do your work and push your changes.
+3. Open a Pull Request into the `dev` branch.
+4. Test and review changes in `dev`.
+5. When everything in `dev` works, open a Pull Request into `main`.
+6. Merge to `main` only when code is tested and ready for production.
+
+
+---
+
 ## 📝 Branch Rules
 
 - `main`: Always stable, deployable code
